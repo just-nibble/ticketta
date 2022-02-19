@@ -34,4 +34,6 @@ urlpatterns = [
         description=API_DESCRIPTION)
     ),
     path('events/', include('events.urls')),
+    path('purchases/', include('purchases.urls')),
+    path('tickets/', include('tickets.urls')),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

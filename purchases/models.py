@@ -20,3 +20,5 @@ class Purchase(models.Model):
     def save(self, *args, **kwargs):
         self.ticket.total = self.ticket.total - self.quantity
         self.ticket.save()
+
+        super(Purchase, self).save(*args, **kwargs)

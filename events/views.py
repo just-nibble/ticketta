@@ -14,6 +14,11 @@ class EventListCreateAPIView(ListCreateAPIView):
     serializer_class = EventSerializer
     queryset = Event.objects.all()
 
+    def perform_create(self, serializer, **kwargs):
+        current_user = self.request.user
+        kwargs['organizer'] = current_user
+        serializer.save(**kwargs)
+
 
 class EventDetailAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (CanEditEvent, )
