@@ -12,11 +12,13 @@ class Event(models.Model):
     end_date_time = models.DateTimeField(null=True, blank=True)
     venue = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    tags = models.CharField(max_length=255, null=True, blank=True)
+    tags = models.CharField(max_length=255, null=True,
+                            blank=True, help_text="tags separated by space")
     important_notes = models.TextField(null=True, blank=True)
-    income = models.IntegerField(null=True, blank=True)
+    income = models.IntegerField(default=0, blank=True)
     event_url = models.URLField(
         null=True, blank=True, help_text="example: http://example.com")
+    image = models.ImageField(upload_to="event/images", null=True, blank=True)
     organizer = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.CASCADE)
 

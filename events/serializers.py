@@ -7,4 +7,4 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ("__all__")
-        read_only_fields = ("organizer", "start_date_time", )
+        read_only_fields = ("organizer", "start_date_time", "income")

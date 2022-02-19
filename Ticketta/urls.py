@@ -14,10 +14,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf.urls.static import static
 from django.urls import path, include
+
+# rest framework imports
+from rest_framework.documentation import include_docs_urls
+
+# project imports
+from Ticketta import settings
+
+API_TITLE = 'Ticketter Docs'
+API_DESCRIPTION = 'A Web API for ticketting'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('docs/', include_docs_urls(
+        title=API_TITLE,
+        description=API_DESCRIPTION)
+    ),
     path('events/', include('events.urls')),
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
