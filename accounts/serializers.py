@@ -1,4 +1,4 @@
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth import get_user_model, authenticate
 
@@ -7,55 +7,51 @@ User = get_user_model()
 
 class RegistrationSerializer(RegisterSerializer):
 
-    username = None
-    deviceID = serializers.CharField()
-
     def validate(self, attrs):
-        deviceID = attrs.get('deviceID')
-        if deviceID:
-            if User.objects.filter(deviceID=deviceID).exists():
+        username = attrs.get('username')
+        if username:
+            if User.objects.filter(username=username).exists():
                 msg = {'error': 'User aleady exists'}
                 raise serializers.ValidationError(msg)
             else:
                 return attrs
         else:
-            raise serializers.ValidationError({'error': "No device id"})
+            raise serializers.ValidationError({'error': "Invalid Username"})
 
     def custom_signup(self, request, user):
         # general
-        user.deviceID = self.validated_data.get('deviceID', '')
+        user.username = self.validated_data.get('username', '')
 
         user.save(update_fields=[
-            'deviceID',
+            'username',
         ])
 
     class Meta:
         ref_name = "CustomLoginSerializer"
-        read_only_fields = ("deviceId", )
 
 
 class LoginSerializer(serializers.Serializer):
-    deviceID = serializers.CharField()
+    username = serializers.CharField()
     password = serializers.CharField(
         style={'input_type': 'password'}, trim_whitespace=False)
 
     def validate(self, attrs):
-        deviceID = attrs.get('deviceID')
+        username = attrs.get('username')
         password = attrs.get('password')
 
-        if deviceID and password:
-            if User.objects.filter(deviceID=deviceID).exists():
+        if username and password:
+            if User.objects.filter(username=username).exists():
                 user = authenticate(request=self.context.get('request'),
-                                    deviceID=deviceID, password=password)
+                                    username=username, password=password)
 
             else:
-                msg = {'error': 'Device is not registered.',
+                msg = {'error': 'Username not found',
                        'register': False}
                 raise serializers.ValidationError(msg)
 
             if not user:
                 msg = {
-                    'error': 'Unable to log in with provided credentials.', 'register': True}
+                    'error': 'Incorrect password'}
                 raise serializers.ValidationError(msg, code='authorization')
 
         else:
