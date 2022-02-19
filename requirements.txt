@@ -3,10 +3,11 @@
 coreapi
 coreschema
 
-Django==3.2
+Django==3.0
 django-allauth==0.41.0
 django-cors-headers
 django-environ
+django_filter==2.4.0
 django-rest-auth
 django-rest-registration
 djangorestframework
