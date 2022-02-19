@@ -177,4 +177,12 @@ REST_FRAMEWORK = {
 
 }
 
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "accounts.serializers.RegistrationSerializer",
+}
+
+REST_AUTH_SERIALIZERS = {
+    'LOGIN_SERIALIZER': "accounts.serializers.LoginSerializer",
+}
+
 SITE_ID = 1

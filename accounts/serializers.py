@@ -45,8 +45,7 @@ class LoginSerializer(serializers.Serializer):
                                     username=username, password=password)
 
             else:
-                msg = {'error': 'Username not found',
-                       'register': False}
+                msg = {'error': 'Username not found'}
                 raise serializers.ValidationError(msg)
 
             if not user:
