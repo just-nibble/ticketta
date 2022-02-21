@@ -11,6 +11,7 @@ django_filter==2.4.0
 django-heroku
 django-rest-auth
 django-rest-registration
+django-rest-swagger
 djangorestframework
 djangorestframework-filters
 django-utils-six
