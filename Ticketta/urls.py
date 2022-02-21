@@ -18,13 +18,28 @@ from django.conf.urls.static import static
 from django.urls import path, include
 
 # rest framework imports
+from rest_framework import permissions
 from rest_framework.documentation import include_docs_urls
+
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 # project imports
 from Ticketta import settings
 
 API_TITLE = 'Ticketter Docs'
 API_DESCRIPTION = 'A Web API for ticketting'
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title=API_TITLE,
+        default_version='v1',
+        description=API_DESCRIPTION,
+        license=openapi.License(name="BSD License"),
+    ),
+    public=False,
+    permission_classes=(permissions.IsAuthenticated,),
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,5 +50,9 @@ urlpatterns = [
     ),
     path('events/', include('events.urls')),
     path('purchases/', include('purchases.urls')),
+    path('reddocs/', schema_view.with_ui('redoc',
+         cache_timeout=0), name="redoc-ui"),
+    path('swagger/', schema_view.with_ui('swagger',
+         cache_timeout=0), name='schema-swagger-ui'),
     path('tickets/', include('tickets.urls')),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

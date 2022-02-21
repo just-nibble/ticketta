@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +31,10 @@ SECRET_KEY = 'django-insecure-z05amotbjsvs7_i!k55vlspayw!c8vhi#n%=u0us+#a2l-smww
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+HOSTED = True
+
+ALLOWED_HOSTS = ['ticketta-dev.herokuapp.com',
+                 '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -189,4 +193,25 @@ REST_AUTH_SERIALIZERS = {
     'LOGIN_SERIALIZER': "accounts.serializers.LoginSerializer",
 }
 
+REST_SESSION_LOGIN = True
+
 SITE_ID = 1
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dbgfe8tk6as54k',
+        'USER': 'wsgnpapbsqlaxi',
+        'PASSWORD': '506e04a0e6a9994885221db5683478e8bdbdbc9829a1c4273fcacffd4a01bde0',
+        'HOST': 'ec2-52-204-196-4.compute-1.amazonaws.com',
+        'PORT': '5432',
+    }
+}
+
+django_heroku.settings(locals())
+
+if HOSTED is False:
+    try:
+        from .local_settings import *
+    except ImportError:
+        pass

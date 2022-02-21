@@ -8,13 +8,19 @@ django-allauth==0.41.0
 django-cors-headers
 django-environ
 django_filter==2.4.0
+django-heroku
 django-rest-auth
 django-rest-registration
 djangorestframework
 djangorestframework-filters
 django-utils-six
+drf-yasg
+
+Gunicorn
 
 Pillow==8.4.0
+psycopg2==2.8.6
 
+yarl
 
 
