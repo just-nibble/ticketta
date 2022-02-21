@@ -61,12 +61,13 @@ INSTALLED_APPS = [
     'allauth.account',
 
     'corsheaders',
-
+    'drf_yasg',
     'django_filters',
 
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_filters',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
