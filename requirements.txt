@@ -22,6 +22,9 @@ Gunicorn
 Pillow==8.4.0
 psycopg2==2.8.6
 
+qrcode
+slugify==0.0.1
+
 yarl
 
 

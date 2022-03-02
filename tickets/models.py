@@ -33,5 +33,4 @@ class Ticket(models.Model):
 
     def save(self, *args, **kwargs):
         self.generateTicketNumber()
-
         super(Ticket, self).save(*args, **kwargs)
