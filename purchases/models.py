@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.core.mail import send_mail
 
-from Ticketta.settings import MEDIA_ROOT, DEBUG, ALLOWED_HOSTS
+from Ticketta.settings import MEDIA_ROOT, HOSTED, ALLOWED_HOSTS
 
 from tickets.models import Ticket
 # Create your models here.
@@ -29,7 +29,7 @@ class Purchase(models.Model):
 
     def save(self, *args, **kwargs):
         if self.__state.adding:
-            if DEBUG:
+            if HOSTED:
                 host = ALLOWED_HOSTS[0] + ":8000"
             else:
                 host = ALLOWED_HOSTS[2]
