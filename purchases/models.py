@@ -3,9 +3,9 @@ import qrcode
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
-# from django.core.mail import send_mail
+from django.core.mail import send_mail
 
-from Ticketta.settings import MEDIA_ROOT
+from Ticketta.settings import MEDIA_ROOT, DEBUG, ALLOWED_HOSTS
 
 from tickets.models import Ticket
 # Create your models here.
@@ -28,23 +28,43 @@ class Purchase(models.Model):
         return self.user.first_name + ": " + self.ticket.event.event_title
 
     def save(self, *args, **kwargs):
-        self.ticket.total = self.ticket.total - self.quantity
-        self.ticket.save()
-        increment = Purchase.objects.count() + 1
-        destination = f"{MEDIA_ROOT}/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png"
+        if self.__state.adding:
+            if DEBUG:
+                host = ALLOWED_HOSTS[0] + ":8000"
+            else:
+                host = ALLOWED_HOSTS[2]
+            self.ticket.total = self.ticket.total - self.quantity
+            self.ticket.save()
+            increment = Purchase.objects.count() + 1
+            destination = f"""
+            {MEDIA_ROOT}/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
+            """
 
-        self.slug = slugify(self.user.username +
-                            self.ticket.event.event_title + increment)
-        # Generate QR code here
+            self.slug = slugify(self.user.username +
+                                self.ticket.event.event_title + increment)
+            # Generate QR code here
 
-        self.url = f"https://test_url.com/purchases/{self.slug}"
+            self.url = f"{host}/purchases/{self.slug}"
 
-        qrCode = qrcode.make(self.url)
-        qrCode.save(destination)
-        self.qrcode = f"http://127.0.0.1:8000/media/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png"
+            qrCode = qrcode.make(self.url)
+            qrCode.save(destination)
+            self.qrcode = f"""
+            {host}/media/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
+            """
 
-        # Upload QR code here
+            recipient_list = [self.user.email, ]
+            send_mail(
+                "Ticket Purchase",
+                f"""
+                You have purchased {self.quantity} tickets for the event:
+                {self.ticket.event.event_title}, below is a link to the ticket
+                and a link to it's QRcode
 
-        # send_mail(qrcode="insert link" + self.ticket.ticket_number)
+                link: {self.url}
+                qrcode: {self.qrcode}
+
+                """,
+                "ticketta@gmail.com", recipient_list, fail_silently=False
+            )
 
         super(Purchase, self).save(*args, **kwargs)

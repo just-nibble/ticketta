@@ -22,7 +22,7 @@ class PurchaseAPIView(ListCreateAPIView):
         serializer.save(**kwargs)
 
 
-class PurchaseUseAPIView(APIView):
+class PurchaseDetailAPIView(APIView):
     def get(self, request, slug):
         purchase = Purchase.objects.get(slug=slug)
 
@@ -42,3 +42,15 @@ class PurchaseUseAPIView(APIView):
                     "ticket_quantity": purchase.ticket.quantity,
                 }
             )
+
+
+class PurchaseUseAPIView(APIView):
+    def get(self, request, slug):
+        purchase = Purchase.objects.get(slug=slug)
+
+        if purchase.used:
+            raise ValidationError({"error": "Ticket has already been used"})
+        else:
+            purchase.used = True
+            purchase.save()
+            return Response({"message": "Ticket successfully checked in"})
