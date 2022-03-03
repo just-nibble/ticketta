@@ -6,4 +6,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = ("__all__")
-        read_only_fields = ("user", )
+        read_only_fields = (
+            "user", "slug", "url",
+            "used", "qrcode"
+        )
