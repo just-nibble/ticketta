@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'events.apps.EventsConfig',
     'purchases.apps.PurchasesConfig',
     'tickets.apps.TicketsConfig',
+    'wallets.apps.WalletsConfig',
 
     # 3rd part packages
     'allauth',
