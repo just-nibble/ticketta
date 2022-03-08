@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from Ticketta.settings import MEDIA_ROOT, HOSTED, ALLOWED_HOSTS
 
 from tickets.models import Ticket
+from wallets.models import Wallet
 # Create your models here.
 
 User = get_user_model()
@@ -28,7 +29,13 @@ class Purchase(models.Model):
         return self.user.first_name + ": " + self.ticket.event.event_title
 
     def save(self, *args, **kwargs):
+
         if self.__state.adding:
+            sellerWallet = Wallet.objects.get(user=self.ticket.event.user)
+            saleAmount = self.quantity * self.ticket.price
+            sellerWallet.deposit(saleAmount)
+            sellerWallet.save()
+
             if HOSTED:
                 host = ALLOWED_HOSTS[0] + ":8000"
             else:

@@ -1,31 +1,48 @@
 # from django.shortcuts import render
-from rest_framework import generics
-# from rest_framework.views import APIView
+from rest_framework import renderers
+from rest_framework.views import APIView
 from .models import (
-    Wallet, Transaction
+    Wallet, Withdrawal
 )
-from .serializers import WalletSerializer, TransactionSerializer
+from .serializers import WithdrawalSerializer
 
 
 # Create your views here.
 
 
-class WalletList(generics.ListCreateAPIView):
-    queryset = Wallet.objects.all()
-    serializer_class = WalletSerializer
+class WithdrawalAPIView(APIView):
+    serializer_class = WithdrawalSerializer
+    renderer_classes = (
+        renderers.BrowsableAPIRenderer, renderers.JSONRenderer,
+        renderers.HTMLFormRenderer, renderers.DocumentationRenderer
+    )
 
+    def post(self, request):
+        serializer = WithdrawalSerializer(
+            data=request.data)
 
-class WalletDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Wallet.objects.all()
-    serializer_class = WalletSerializer
+        currentUser = request.user
+        wallet = Wallet.objects.get(user=currentUser)
 
+        if serializer.is_valid(self):
+            amount = serializer.validated_data.get("amount")
 
-class Transfer(generics.ListCreateAPIView):
-    queryset = Transaction.objects.all()
+            canWithdraw = wallet.can_withdraw(amount)
 
-    serializer_class = TransactionSerializer
+            if canWithdraw:
+                previousAmount = wallet.current_balance
+                currentAmount = wallet.current_balance + amount
+                withdrawal = Withdrawal(
+                    creator=currentUser,
+                    withdrawal_amount=amount,
+                    previous_amount=previousAmount,
+                    current_amount=currentAmount
+                )
+                withdrawal.save()
 
+                wallet.withdraw(amount)
+                wallet.save()
 
-class Deposit(generics.ListCreateAPIView):
-    queryset = Transaction.objects.all()
-    serializer_class = WalletSerializer
+            else:
+                raise serializer.ValidationError(
+                    {"error": "Insufficient Balance"})
