@@ -66,7 +66,7 @@ class Purchase(models.Model):
 
             qrCode = qrcode.make(self.url)
             qrCode.save(destination)
-            self.qrcode = f"""
+            self.qrCode = f"""
             {host}/media/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
             """
 
