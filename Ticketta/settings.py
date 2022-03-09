@@ -219,6 +219,13 @@ EMAIL_HOST_PASSWORD = "EMAIL_HOST_PASSWORD"
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'Ticketta'
 
+FLW_PRODUCTION_PUBLIC_KEY = "your key"
+FLW_PRODUCTION_SECRET_KEY = "your key"
+FLW_SANDBOX_PUBLIC_KEY = "your key"
+FLW_SANDBOX_SECRET_KEY = "your key"
+FLW_SANDBOX = True
+
+
 django_heroku.settings(locals())
 
 if HOSTED is False:

@@ -5,16 +5,24 @@ from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.core.mail import send_mail
 
-from Ticketta.settings import MEDIA_ROOT, HOSTED, ALLOWED_HOSTS
+from djangoflutterwave.models import FlwPlanModel
+
 
 from tickets.models import Ticket
-from wallets.models import Wallet
+
+
+from Ticketta.settings import MEDIA_ROOT, HOSTED, ALLOWED_HOSTS
+
+
 # Create your models here.
 
 User = get_user_model()
 
 
 class Purchase(models.Model):
+
+    purchase_status = (("pending", "pending"),
+                       ("paid", "paid"), ("used", "used"))
     user = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.CASCADE)
     ticket = models.ForeignKey(
@@ -22,17 +30,18 @@ class Purchase(models.Model):
     quantity = models.IntegerField(null=True, blank=True)
     slug = models.SlugField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
-    used = models.BooleanField(default=False)
-    qrcode = models.CharField(max_length=300, null=True, blank=True)
+    status = models.CharField(max_length=300, default="pending", blank=True)
+    qrCode = models.CharField(max_length=300, null=True, blank=True)
+    plan = models.ForeignKey(FlwPlanModel, null=True,
+                             blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.first_name + ": " + self.ticket.event.event_title
 
     def save(self, *args, **kwargs):
-
-        if self.__state.adding:
-            sellerWallet = Wallet.objects.get(user=self.ticket.event.user)
+        if self.status == "paid":
             saleAmount = self.quantity * self.ticket.price
+            sellerWallet = self.ticket.event.user
             sellerWallet.deposit(saleAmount)
             sellerWallet.save()
 
@@ -40,7 +49,9 @@ class Purchase(models.Model):
                 host = ALLOWED_HOSTS[0] + ":8000"
             else:
                 host = ALLOWED_HOSTS[2]
-            self.ticket.total = self.ticket.total - self.quantity
+
+            self.ticket.total = self.ticket.total - \
+                (saleAmount/self.ticket.price)
             self.ticket.save()
             increment = Purchase.objects.count() + 1
             destination = f"""
@@ -73,5 +84,14 @@ class Purchase(models.Model):
                 """,
                 "ticketta@gmail.com", recipient_list, fail_silently=False
             )
+        elif self.status == "pending":
+            plan = FlwPlanModel(
+                name=self.ticket.ticket_number,
+                amount=saleAmount,
+                modal_title=self.ticket.event.event_title,
+
+            )
+            plan.save()
+            self.plan = plan
 
         super(Purchase, self).save(*args, **kwargs)

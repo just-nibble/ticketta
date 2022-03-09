@@ -52,12 +52,12 @@ class Withdrawal(models.Model):
         send_mail(
             "Withdrawal Request",
             f"""
-            You have made a withdrawal request for {self.withdrawal_amout},
-            you will receive your requested amount at
+            A withdrawal request has been made for {self.withdrawal_amout},
+            send the requested amount to
             {self.creator.bank_account_name},
             with {self.creator.bank_account_number}.
             """,
             "ticketta.com",
-            [self.creator.email]
+            ["princewillolaiya@gmail.com"]
         )
         return super(Wallet, self).save(*args, **kwargs)

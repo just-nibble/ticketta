@@ -4,6 +4,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from djangoflutterwave.models import FlwTransactionModel
+
+from django.shortcuts import get_list_or_404
+
 
 from .serializers import PurchaseSerializer
 
@@ -26,7 +30,7 @@ class PurchaseDetailAPIView(APIView):
     def get(self, request, slug):
         purchase = Purchase.objects.get(slug=slug)
 
-        if purchase.used:
+        if purchase.status == "used":
             raise ValidationError({"error": "Ticket has already been used"})
         else:
             return Response(
@@ -48,9 +52,15 @@ class PurchaseUseAPIView(APIView):
     def get(self, request, slug):
         purchase = Purchase.objects.get(slug=slug)
 
-        if purchase.used:
+        if purchase.status == "used":
             raise ValidationError({"error": "Ticket has already been used"})
         else:
-            purchase.used = True
+            purchase.status = "used"
             purchase.save()
             return Response({"message": "Ticket successfully checked in"})
+
+
+class TransacAPIView(APIView):
+    def get(self, request):
+        trans = get_list_or_404(FlwTransactionModel)
+        return Response(trans)

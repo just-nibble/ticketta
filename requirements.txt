@@ -8,6 +8,7 @@ django-allauth==0.41.0
 django-cors-headers
 django-environ
 django_filter==2.4.0
+djangoflutterwave==0.3.0
 django-heroku
 django-rest-auth
 django-rest-registration

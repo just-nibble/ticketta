@@ -18,9 +18,10 @@ class Ticket(models.Model):
 
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, null=True, blank=True)
-    price = models.IntegerField(null=True, blank=True)
-    total = models.IntegerField(null=True, blank=True)
-    ticket_number = models.IntegerField(null=True, blank=True, unique=True)
+    price = models.PositiveIntegerField(null=True, blank=True)
+    total = models.PositiveIntegerField(null=True, blank=True)
+    ticket_number = models.PositiveIntegerField(
+        null=True, blank=True, unique=True)
     ticket_type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(
         max_length=255, null=True, blank=True, choices=ticket_status_choices)
@@ -33,4 +34,5 @@ class Ticket(models.Model):
 
     def save(self, *args, **kwargs):
         self.generateTicketNumber()
+
         super(Ticket, self).save(*args, **kwargs)
