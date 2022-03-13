@@ -49,7 +49,6 @@ urlpatterns = [
         description=API_DESCRIPTION)
     ),
     path('events/', include('events.urls')),
-    path('purchases/', include('purchases.urls')),
     path('reddocs/', schema_view.with_ui('redoc',
          cache_timeout=0), name="redoc-ui"),
     path('swagger/', schema_view.with_ui('swagger',

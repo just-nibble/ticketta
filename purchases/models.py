@@ -1,17 +1,27 @@
 import qrcode
 
+from io import BytesIO
+
+import boto3
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.core.mail import send_mail
 
-from djangoflutterwave.models import FlwPlanModel
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from djangoflutterwave.models import FlwPlanModel, FlwTransactionModel
 
 
 from tickets.models import Ticket
 
 
-from Ticketta.settings import MEDIA_ROOT, HOSTED, ALLOWED_HOSTS
+from Ticketta.settings import (
+    HOSTED, ALLOWED_HOSTS, AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY
+)
 
 
 # Create your models here.
@@ -54,9 +64,6 @@ class Purchase(models.Model):
                 (saleAmount/self.ticket.price)
             self.ticket.save()
             increment = Purchase.objects.count() + 1
-            destination = f"""
-            {MEDIA_ROOT}/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
-            """
 
             self.slug = slugify(self.user.username +
                                 self.ticket.event.event_title + increment)
@@ -65,9 +72,22 @@ class Purchase(models.Model):
             self.url = f"{host}/purchases/{self.slug}"
 
             qrCode = qrcode.make(self.url)
-            qrCode.save(destination)
-            self.qrCode = f"""
-            {host}/media/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
+            buffer = BytesIO()
+            qrCode.save(buffer, "PNG")
+            s3 = boto3.client('s3')
+            s3 = boto3.client(
+                's3', aws_access_key_id=AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                region_name='eu-west-3'
+            )
+            s3.put_object(
+                Bucket='mint-engine',
+                Key='purchases/qrcode/'+self.user.username+"_" +
+                    self.ticket.event.event_title+increment+'.png',
+                Body=buffer,
+                ContentType='image/png',
+            )
+            self.qrCode = f"""https://mint-engine.s3.eu-west-3.amazonaws.com/purchases/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
             """
 
             recipient_list = [self.user.email, ]
@@ -95,3 +115,11 @@ class Purchase(models.Model):
             self.plan = plan
 
         super(Purchase, self).save(*args, **kwargs)
+
+
+@receiver(post_save, sender=FlwTransactionModel)
+def set_paid(sender, instance, *args, **kwargs):
+    plan = instance.plan
+    purchase = Purchase.objects.get(plan=plan)
+    purchase.status = "paid"
+    purchase.save()
