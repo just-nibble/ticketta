@@ -20,7 +20,7 @@ from tickets.models import Ticket
 
 from Ticketta.settings import (
     HOSTED, ALLOWED_HOSTS, AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
 )
 
 
@@ -81,13 +81,13 @@ class Purchase(models.Model):
                 region_name='eu-west-3'
             )
             s3.put_object(
-                Bucket='mint-engine',
+                Bucket=AWS_STORAGE_BUCKET_NAME,
                 Key='purchases/qrcode/'+self.user.username+"_" +
                     self.ticket.event.event_title+increment+'.png',
                 Body=buffer,
                 ContentType='image/png',
             )
-            self.qrCode = f"""https://mint-engine.s3.eu-west-3.amazonaws.com/purchases/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
+            self.qrCode = f"""https://{AWS_STORAGE_BUCKET_NAME}.s3.eu-west-3.amazonaws.com/purchases/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
             """
 
             recipient_list = [self.user.email, ]
