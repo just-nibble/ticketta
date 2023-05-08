@@ -14,12 +14,15 @@ This API allows you to create multiple events and tickets, you can view purchase
 - Refer to the requirements.txt file
 
 ### Installing
+1. Build the container by running ``` docker build ticketta:v1 . ```
+2. Run the container by running ```docker run --env-file=.env -p 8000:8000 ticketta:v1 ```
 
-- pip install -r requirements.txt
+## Alternatively ##
+1. RUN ```pip install -r requirements.txt```
 - A running virtual environment is advised
 
-### Executing program
+2. run ```python manage.py migrate```
+3. run ```python manage.py runserver```
 
-- navigate to the project folder
-- run 'python manage.py makemigrations' and 'python manage.py migrate'
-- run 'python manage.py runserver'
+### Usage ###
+Documentation is available at /docs
