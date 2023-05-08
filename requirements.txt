@@ -20,7 +20,7 @@ drf-yasg
 gunicorn
 
 Pillow==8.4.0
-psycopg2==2.8.6
+psycopg2-binary
 
 qrcode
 slugify==0.0.1
