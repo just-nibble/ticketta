@@ -19,8 +19,9 @@ from tickets.models import Ticket
 
 
 from Ticketta.settings import (
-    HOSTED, ALLOWED_HOSTS, AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
+    ALLOWED_HOSTS, AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY, AWS_S3_CUSTOM_DOMAIN,
+    AWS_STORAGE_BUCKET_NAME, DEBUG, QRCODE_DIR
 )
 
 
@@ -55,10 +56,10 @@ class Purchase(models.Model):
             sellerWallet.deposit(saleAmount)
             sellerWallet.save()
 
-            if HOSTED:
-                host = ALLOWED_HOSTS[0] + ":8000"
+            if DEBUG:
+                host = "localhost" + ":8000"
             else:
-                host = ALLOWED_HOSTS[2]
+                host = ALLOWED_HOSTS[0]
 
             self.ticket.total = self.ticket.total - \
                 (saleAmount/self.ticket.price)
@@ -87,7 +88,7 @@ class Purchase(models.Model):
                 Body=buffer,
                 ContentType='image/png',
             )
-            self.qrCode = f"""https://{AWS_STORAGE_BUCKET_NAME}.s3.eu-west-3.amazonaws.com/purchases/qrcode/{self.user.username}_{self.ticket.event.event_title}{increment}.png
+            self.qrCode = f"""https://{AWS_S3_CUSTOM_DOMAIN}{QRCODE_DIR}{self.user.username}_{self.ticket.event.event_title}{increment}.png
             """
 
             recipient_list = [self.user.email, ]
