@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,14 +25,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-SECRET_KEY = 'django-insecure-z05amotbjsvs7_i!k55vlspayw!c8vhi#n%=u0us+#a2l-smww'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
-HOSTED = True
-
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ticketta-dev.herokuapp.com', ]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 
 
 # Application definition
@@ -199,26 +196,34 @@ REST_SESSION_LOGIN = True
 
 SITE_ID = 1
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dbgfe8tk6as54k',
-        'USER': 'wsgnpapbsqlaxi',
-        'PASSWORD': '506e04a0e6a9994885221db5683478e8bdbdbc9829a1c4273fcacffd4a01bde0',
-        'HOST': 'ec2-52-204-196-4.compute-1.amazonaws.com',
-        'PORT': '5432',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = "EMAIL_HOST_USER"
-EMAIL_HOST_PASSWORD = "EMAIL_HOST_PASSWORD"
-EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = 'Ticketta'
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': '5432',
+        }
+    }
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_HOST_USER = "EMAIL_HOST_USER"
+    EMAIL_HOST_PASSWORD = "EMAIL_HOST_PASSWORD"
+    EMAIL_PORT = 587
+    DEFAULT_FROM_EMAIL = 'Ticketta'
 
 FLW_PRODUCTION_PUBLIC_KEY = "your key"
 FLW_PRODUCTION_SECRET_KEY = "your key"
@@ -242,11 +247,3 @@ if AWS:
     AWS_S3_VERIFY = True
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-
-django_heroku.settings(locals())
-
-if HOSTED is False:
-    try:
-        from .local_settings import *
-    except ImportError:
-        pass
